@@ -1,0 +1,6 @@
+397,398c397,398
+< // $servers->setValue('login','attr','dn');
+< $servers->setValue('login','attr','uid');
+---
+>    $servers->setValue('login','attr','dn');
+> // $servers->setValue('login','attr','uid');

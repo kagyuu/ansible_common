@@ -1,0 +1,4 @@
+.vagrant/
+.retry
+.rpm
+.DS_Store

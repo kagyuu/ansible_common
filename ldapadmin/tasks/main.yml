@@ -1,0 +1,29 @@
+---
+- name: Install Apache
+  yum: name=httpd state=present
+
+# Trick for installing php.
+- name: Start Apach
+  service: name=httpd enabled=Yes state=started
+
+- name: Install phpldapadmin
+  yum: name=phpldapadmin state=present
+
+- name: update apache's phpldapadmin.conf
+  replace:
+    dest=/etc/httpd/conf.d/phpldapadmin.conf
+    regexp="Require local"
+    replace="Require all granted"
+
+# To Create the patch file:
+# $ vagrant ssh ldap -- sudo diff /etc/phpldapadmin/config.php.org /etc/phpldapadmin/config.php \
+#   > ../ansible_common/ldapadmin/files/config.php.diff
+- name: apply patch to /etc/phpldapadmin/config.php
+  patch: >
+    src=config.php.diff
+    dest=/etc/phpldapadmin/config.php
+    backup=yes
+
+# Trick for installing php.
+- name: Restart Apach
+  service: name=httpd enabled=Yes state=restarted

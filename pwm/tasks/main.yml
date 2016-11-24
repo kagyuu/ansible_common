@@ -1,0 +1,58 @@
+---
+- name: find latest pwm
+  shell: "curl http{{ COLON }}//www.pwm-project.org/artifacts/pwm/ | awk 'match($0,/>pwm.*zip</) { print substr($0,RSTART+1,RLENGTH{{ MINUS }}2) }' | sort | tail {{ MINUS }}1"
+  register: latest_pwm
+
+- debug: var=latest_pwm.stdout
+
+- file: path=/tmp/pwm/war state=directory mode=0755
+
+- name: Check whether latest pwme was downloaded or not
+  stat: path=/tmp/pwm/{{ latest_pwm.stdout }}
+  register: latest_pwm_zip
+
+- name: Download latest pwm
+  get_url:
+    url: http{{ COLON }}//www.pwm-project.org/artifacts/pwm/{{ latest_pwm.stdout }}
+    dest: /tmp/pwm
+  when: not latest_pwm_zip.stat.exists
+
+- name: unarchive pwm
+  unarchive:
+    src=/tmp/pwm/{{ latest_pwm.stdout }}
+    dest=/tmp/pwm
+    force=yes
+    copy=no
+
+- name: add ldap root password and schema
+  command:
+    ldapadd -Y EXTERNAL -H ldapi:// -f /tmp/pwm/supplemental/ldif/openldap.ldif
+  ignore_errors: yes
+
+- name: unarchive pwm.war
+  command:
+    chdir=/tmp/pwm/war
+    jar xf /tmp/pwm/pwm.war
+
+- name: update web.xml
+  replace:
+    dest=/tmp/pwm/war/WEB-INF/web.xml
+    regexp=unspecified
+    replace="/home/tomcat/pwm"
+
+- name: overwrite web.xml on the pwm.war
+  command:
+    chdir=/tmp/pwm/war
+    jar uf /tmp/pwm/pwm.war WEB-INF/web.xml
+
+- name: Create pwm work directory
+  file: path=/home/tomcat/pwm state=directory owner=tomcat group=tomcat mode=0755
+
+- name: deploy pwm.war to tomcat
+  copy:
+    src=/tmp/pwm/pwm.war
+    dest=/opt/tomcat/webapps/
+    owner=tomcat
+    remote_src=yes
+    force=yes
+

@@ -1,0 +1,72 @@
+---
+- name: Install epel
+  yum: name=epel-release state=present
+
+- name: update os
+  command: yum -y update
+
+- name: Install Basic Services
+  yum: name={{ item }}  state=present
+  with_items:
+    - curl
+    - wget
+    - lynx
+    - policycoreutils
+    - openssh-server
+    - openssh-clients
+    - postfix
+    - firewalld
+    - libselinux-python
+    - tree
+    - htop
+    - avahi
+    - avahi-tools
+    - nss-mdns
+    - patch
+    - tar
+    - unzip
+
+- name: Disable SELinux
+  selinux: state=disabled
+
+- name: Check SELinux Status
+  shell: "getenforce"
+  register: selinux_result
+
+- debug: var=selinux_result.stdout_lines
+
+# 構築対象のサーバ側で shutdown -r now を実行。
+# Async なので結果を待たずに、ただちに再起動待ちタスクが実行される
+- name: Reboot the Application Server to disable SELinux
+  shell: sleep 2 && shutdown -r now
+  async: 1
+  poll: 0
+#      ignore_errors: true
+  when: selinux_result.stdout != "Disabled"
+
+# Ansible を実行している側で、構築対象のサーバが起動するのを最大300sec待つ
+# delay が短すぎると shutdown 中に port にアクセスして wait_for から抜けてしまう
+- name: Wait the Application Server ready
+  local_action: wait_for host={{ ansible_ssh_host }} port={{ ansible_ssh_port }} delay=30 timeout=300
+  sudo: false
+  when: selinux_result.stdout != "Disabled"
+
+- name: Start Services
+  service: name={{ item }} enabled=Yes state=started
+  with_items:
+    - sshd
+    - postfix
+    - firewalld
+    - avahi-daemon
+
+- name: Setup firewalld
+  firewalld: permanent=True service={{ item }} state=enabled permanent=yes
+  with_items:
+    - http
+    - https
+    - mdns
+  notify: Reload firewall
+
+# Workaround for ansible 2.1 : handler in role not work
+- name: Reload firewall
+  service: name=firewalld state=reloaded

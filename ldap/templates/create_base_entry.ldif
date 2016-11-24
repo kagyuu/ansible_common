@@ -1,0 +1,33 @@
+dn: {{ SUFFIX }}
+objectClass: dcObject
+objectClass: organization
+dc: {{ DOMAIN }}
+o: {{ ORG }}
+
+dn: ou=People,{{ SUFFIX }}
+objectClass: organizationalUnit
+ou: People
+
+dn: ou=Group,{{ SUFFIX }}
+objectClass: organizationalUnit
+ou: Group
+
+# admin user
+dn: cn=ichiro,ou=People,{{ SUFFIX }}
+objectClass: inetOrgPerson
+cn: ichiro
+sn: suzuki
+userPassword: ichiro123
+
+# test user
+dn: cn=jiro,ou=People,{{ SUFFIX }}
+objectClass: inetOrgPerson
+cn: jiro
+sn: suzuki
+userPassword: jiro123
+
+# admin group
+dn: cn=admin,ou=Group,{{ SUFFIX }}
+objectClass: groupOfNames
+cn: admin
+member: cn=ichiro,ou=People,{{ SUFFIX }}

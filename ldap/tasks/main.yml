@@ -1,0 +1,92 @@
+---
+###
+# Install OpenLDAP
+- name: Install OpenLDAP
+  yum: name={{ item }}  state=present
+  with_items:
+    - openldap
+    - openldap-servers
+    - openldap-clients
+
+- name: copy db config
+  copy:
+    src=/usr/share/openldap-servers/DB_CONFIG.example
+    dest=/var/lib/ldap/DB_CONFIG
+    remote_src=True
+
+- name: ldap service setup
+  service:
+    name=slapd
+    state=restarted
+    enabled=yes
+
+- name: create work directory for setting openldap
+  file: path=/etc/openldap/init_work state=directory owner=root group=root mode=0755
+
+- name: Create encrypted root password
+  command: slappasswd -s {{ ROOT_PWD }}
+  register: encrypted_root_pwd
+
+###
+# Add root password and schema under cn=config
+# OpenLdap 2.3 or later is OLC(On-Line Configuration). The configurations of
+# the OpenLdap itself is in the ldap directory cn=config insted of ldap.conf
+# of 2.2 or latter.
+# So we must configure the OpenLdap after starting it.
+# .. I think the OLC is badly mistake.
+- name: Check whether add_rootPw.ldif was installed or not
+  stat: path=/etc/openldap/init_work/add_rootPw.ldif
+  register: add_rootPw
+
+- template:
+    src={{ item }}
+    dest=/etc/openldap/init_work/{{ item }}
+    force=no
+  with_items:
+    - memberof.ldif
+    - add_rootPw.ldif
+    - change_domain.ldif
+  when: not add_rootPw.stat.exists
+
+# core.schema   (required) : basic attribute. "cn", "ou", etc.
+# cosine.schema (required) : x500/COSINE tree figure data structure
+# inetorgperson.schema     : name, group, email, etc.
+- name: add ldap root password and schema
+  command:
+    ldapadd -Y EXTERNAL -H ldapi:// -f {{ item }}
+  with_items:
+    - /etc/openldap/schema/cosine.ldif
+    - /etc/openldap/schema/inetorgperson.ldif
+    - /etc/openldap/init_work/memberof.ldif
+    - /etc/openldap/init_work/add_rootPw.ldif
+    - /etc/openldap/init_work/change_domain.ldif
+  when: not add_rootPw.stat.exists
+
+###
+# Add base entry under dc=example,dc=com.
+- name: Check whether create_base_entry.ldif was installed or not
+  stat: path=/etc/openldap/init_work/create_base_entry.ldif
+  register: create_base_entry
+
+- template:
+    src=create_base_entry.ldif
+    dest=/etc/openldap/init_work/create_base_entry.ldif
+    force=no
+  when: not create_base_entry.stat.exists
+
+- name: add ldap root password and schema
+  command:
+    ldapadd -x -D "cn=Manager,{{ SUFFIX }}" -w {{ ROOT_PWD }} -f {{ item }}
+  with_items:
+    - /etc/openldap/init_work/create_base_entry.ldif
+  when: not create_base_entry.stat.exists
+
+- name: Setup firewalld
+  service: name=firewalld state=started
+
+- name: Setup firewalld
+  firewalld: permanent=True service={{ item }} state=enabled permanent=yes
+  with_items:
+    - ldap
+
+- service: name=firewalld state=reloaded

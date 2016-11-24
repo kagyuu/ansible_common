@@ -1,0 +1,69 @@
+---
+- name: Install open-jdk
+  yum: name={{ item }}  state=present
+  with_items:
+    - java-1.8.0-openjdk-devel
+    - maven
+    - ant
+    - postgresql-jdbc
+    - mysql-connector-java
+
+- name: Check whether tomcat was downloaded or not
+  stat: path=/opt/apache-tomcat-{{ TOMCAT_VERSION }}
+  register: opt_tomcat
+
+- group: name=tomcat
+- user: name=tomcat group=tomcat
+
+- name: Download tomcat
+  get_url:
+    url="http://ftp.tsukuba.wide.ad.jp/software/apache/tomcat/tomcat-8/v{{ TOMCAT_VERSION }}/bin/apache-tomcat-{{ TOMCAT_VERSION }}.tar.gz"
+    dest=/tmp
+  when: not opt_tomcat.stat.exists
+
+- name: Unarchive tomcat
+  unarchive:
+    src=/tmp/apache-tomcat-{{ TOMCAT_VERSION }}.tar.gz
+    dest=/opt
+    force=yes
+    copy=no
+  when: not opt_tomcat.stat.exists
+
+- name: Change owner of /opt/apache-tomcat-{{ TOMCAT_VERSION }} tomcat:tomcat
+  file:
+    path=/opt/apache-tomcat-{{ TOMCAT_VERSION }} state=directory
+    owner=tomcat group=tomcat
+    recurse=yes
+
+- name: Symlink tomcat
+  file: src=/opt/apache-tomcat-{{ TOMCAT_VERSION }} dest=/opt/tomcat state=link
+    owner=tomcat group=tomcat
+    force=yes
+
+- name: Install jdbc drivers
+  file: src=/usr/share/java/{{ item }} dest=/opt/tomcat/lib/{{ item }} state=link force=yes
+  with_items:
+    - postgresql-jdbc3.jar
+    - mysql-connector-java.jar
+
+- name: Install systemd config for tomcat
+  copy: src=systemd_tomcat dest=/usr/lib/systemd/system/tomcat.service mode=0644
+
+- name: Install enviroment vars file for tomcat
+  copy: src=sysconfig_tomcat dest=/etc/sysconfig/tomcat mode=0644
+
+- name: tomcat service setup
+  service:
+    name=tomcat
+    state=restarted
+    enabled=yes
+
+- name: Setup firewalld
+  service: name=firewalld state=started
+
+- firewalld: permanent=True port={{ item }} state=enabled permanent=yes
+  with_items:
+    - 8080/tcp
+    - 8443/tcp
+
+- service: name=firewalld state=reloaded

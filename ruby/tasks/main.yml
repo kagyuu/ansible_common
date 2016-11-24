@@ -1,0 +1,63 @@
+---
+- name: Check whether ruby was installed or not
+  stat: path=/usr/local/bin/ruby
+  register: ruby
+
+- name: Install libraries from yum for building latest ruby
+  yum: name="{{ item }}" state=present
+  with_items:
+    - "@Development Tools"
+    - "openssl-devel"
+    - "readline-devel"
+    - "zlib-devel"
+    - "curl-devel"
+    - "libyaml-devel"
+    - "libffi-devel"
+    - "gdbm-devel"
+    - "postgresql-devel"
+    - "httpd-devel"
+    - "ImageMagick-devel"
+
+- stat: path={{ src_dir }}/{{ ruby_version }}.tar.gz
+  register: tarball
+  when: not ruby.stat.exists
+
+# cf. https://www.ruby-lang.org/ja/downloads/
+- name: Download ruby source with check (sha256)
+  get_url:
+    url: https://cache.ruby-lang.org/pub/ruby/2.3/{{ ruby_version }}.tar.gz
+    dest: "{{ src_dir }}"
+    checksum: sha256:b87c738cb2032bf4920fef8e3864dc5cf8eae9d89d8d523ce0236945c5797dcd
+    validate_certs: false
+  when: (not ruby.stat.exists) and (not tarball.stat.exists)
+
+- name: Expand ruby source
+  command:
+    chdir={{ src_dir }}
+    tar xf {{ ruby_version }}.tar.gz
+  when: not ruby.stat.exists
+
+- name: Configure ruby
+  command:
+    chdir={{ src_dir }}/{{ ruby_version }}
+    ./configure --disable-install-doc
+  when: not ruby.stat.exists
+
+- name: Make ruby
+  command:
+    chdir={{ src_dir }}/{{ ruby_version }}
+    make
+  when: not ruby.stat.exists
+
+- name: Install ruby
+  command:
+    chdir={{ src_dir }}/{{ ruby_version }}
+    make install
+  when: not ruby.stat.exists
+
+- name: Install ruby bundler
+  gem:
+    name=bundler
+    user_install=no
+  environment:
+    PATH: "/usr/local/bin:{{ ansible_env.PATH }}"

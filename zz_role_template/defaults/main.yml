@@ -1,0 +1,15 @@
+---
+- name: Install Passenger
+  gem:
+    name=passenger
+    user_install=no
+  environment:
+    PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
+
+- name: Install Passenger modules for Apache 
+  sudo: yes
+  command:
+    passenger-install-apache2-module --auto
+  environment:
+    PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
+  when: result.rc == 1
