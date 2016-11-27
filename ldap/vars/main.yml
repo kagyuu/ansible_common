@@ -3,4 +3,3 @@
 ROOT_PWD: secret
 DOMAIN: example
 SUFFIX: dc=example,dc=com
-ORG: production site
