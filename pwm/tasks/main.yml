@@ -24,7 +24,7 @@
     force=yes
     copy=no
 
-- name: add ldap root password and schema
+- name: add pwm entension scema to openldap
   command:
     ldapadd -Y EXTERNAL -H ldapi:// -f /tmp/pwm/supplemental/ldif/openldap.ldif
   ignore_errors: yes
@@ -55,4 +55,3 @@
     owner=tomcat
     remote_src=yes
     force=yes
-
