@@ -25,6 +25,11 @@
     - patch
     - tar
     - unzip
+    - python-pip
+
+# ansible expect module needs latest (>=3.3) pexpect.
+# On yum repository, pexpect is too old.
+- pip: name=pexpect
 
 - name: Disable SELinux
   selinux: state=disabled

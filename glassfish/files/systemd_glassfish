@@ -1,0 +1,16 @@
+[Unit]
+Description=GlassFish Server
+After=network.target remote-fs.target
+
+[Service]
+Type=forking
+PIDFile=/opt/glassfish4/glassfish/domains/domain1/config/pid
+ExecStart=/opt/glassfish4/bin/asadmin start-domain
+ExecReload=/opt/glassfish4/bin/asadmin restart-domain
+ExecStop=/opt/glassfish4/bin/asadmin stop-domain
+TimeoutStartSec=300
+TimeoutStopSec=30
+User=glassfish
+
+[Install]
+WantedBy=multi-user.target

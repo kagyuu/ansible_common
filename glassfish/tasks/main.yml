@@ -1,0 +1,86 @@
+---
+- name: Install open-jdk
+  yum: name={{ item }}  state=present
+  with_items:
+    - java-1.8.0-openjdk-devel
+    - maven
+    - ant
+    - postgresql-jdbc
+    - mysql-connector-java
+
+- name: Check whether glassfish was downloaded or not
+  stat: path="/opt/glassfish-{{ GLASSFISH_VERSION }}"
+  register: opt_glassfish
+
+- group: name=glassfish
+- user: name=glassfish group=glassfish
+
+- name: Download glassfish
+  get_url:
+    url="http://download.java.net/glassfish/{{ GLASSFISH_VERSION }}/release/glassfish-{{ GLASSFISH_VERSION }}.zip"
+    dest=/tmp
+  when: not opt_glassfish.stat.exists
+
+- name: Unarchive glassfish
+  unarchive:
+    src=/tmp/glassfish-{{ GLASSFISH_VERSION }}.zip
+    dest=/opt
+    force=yes
+    copy=no
+  when: not opt_glassfish.stat.exists
+
+- name: Change owner of /opt/glassfish4 glassfish:glassfish
+  file:
+    path=/opt/glassfish4 state=directory
+    owner=glassfish group=glassfish
+    recurse=yes
+
+# TODO : How about postgis.jar?
+- name: Install jdbc drivers
+  file: src=/usr/share/java/{{ item }} dest=/opt/glassfish4/glassfish/domains/domain1/lib/{{ item }} state=link force=yes
+  with_items:
+    - postgresql-jdbc3.jar
+    - mysql-connector-java.jar
+
+- name: Install systemd config for glassfish
+  copy: src=systemd_glassfish dest=/usr/lib/systemd/system/glassfish.service mode=0644
+
+- name: glassfish service setup
+  service:
+    name=glassfish
+    state=started
+    enabled=yes
+
+- name: Setup firewalld
+  service: name=firewalld state=started
+
+- firewalld: permanent=True port={{ item }} state=enabled permanent=yes
+  with_items:
+    - 8080/tcp
+    - 4848/tcp
+
+- service: name=firewalld state=reloaded
+
+- name: set admin password
+  expect:
+    command: "/opt/glassfish4/bin/asadmin change-admin-password --user admin"
+    responses:
+      'Enter the admin password>': ""
+      'Enter the new admin password>': "password"
+      'Enter the new admin password again>': "password"
+
+- name: set management console user
+  expect:
+    command: "/opt/glassfish4/bin/asadmin login"
+    responses:
+      'Enter admin user name [Enter to accept default]>': "admin"
+      'Enter admin password>': "password"
+
+- name: make management console ssl
+  command: "/opt/glassfish4/bin/asadmin enable-secure-admin"
+
+- name: restart glassfish
+  service:
+    name=glassfish
+    state=restarted
+    enabled=yes
