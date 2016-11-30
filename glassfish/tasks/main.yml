@@ -59,7 +59,7 @@
     - 8080/tcp
     - 4848/tcp
 
-- service: name=firewalld state=reloaded
+- service: name=firewalld state=restarted
 
 - name: set admin password
   expect:
@@ -73,8 +73,10 @@
   expect:
     command: "/opt/glassfish4/bin/asadmin login"
     responses:
-      'Enter admin user name [Enter to accept default]>': "admin"
-      'Enter admin password>': "password"
+      # These response messages is regex. So, we must escape [ and ]
+      # if these are not control characters of regex.
+      "Enter admin user name \\[Enter to accept default\\]> ": "admin"
+      "Enter admin password> ": "password"
 
 - name: make management console ssl
   command: "/opt/glassfish4/bin/asadmin enable-secure-admin"

@@ -74,4 +74,4 @@
 
 # Workaround for ansible 2.1 : handler in role not work
 - name: Reload firewall
-  service: name=firewalld state=reloaded
+  service: name=firewalld state=restarted

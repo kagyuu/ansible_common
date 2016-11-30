@@ -55,3 +55,15 @@
     owner=tomcat
     remote_src=yes
     force=yes
+
+- name: Check whether apache is installed or not
+  stat: path=/etc/httpd/conf/httpd.conf
+  register: apache
+
+- name: Install reverse proxy setting
+  copy: src=apache_pwm.conf dest=/etc/httpd/conf.d/pwm.conf mode=0644
+  when: apache.stat.exists
+
+- name: Restart Apach
+  service: name=httpd enabled=Yes state=restarted
+  when: apache.stat.exists

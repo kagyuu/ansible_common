@@ -89,4 +89,4 @@
   with_items:
     - ldap
 
-- service: name=firewalld state=reloaded
+- service: name=firewalld state=restarted

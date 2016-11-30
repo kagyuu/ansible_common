@@ -66,4 +66,4 @@
     - 8080/tcp
     - 8443/tcp
 
-- service: name=firewalld state=reloaded
+- service: name=firewalld state=restarted

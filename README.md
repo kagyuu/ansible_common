@@ -43,6 +43,7 @@ Ansible Common Roles
 |ROOT_PWD |secret ||
 |DOMAIN   |example|DOMAIN must be the first dc of the SUFFIX.|
 |SUFFIX   |dc=example,dc=com|base dn|
+|ORG      |example co. ltd.|Organization name.|
 
 - Abstract : Install OpenLDAP
   1. install openldap
@@ -150,6 +151,7 @@ Ansible Common Roles
 
   - Abstract
     1. install PWM to /opt/tomcat/webapps
+    1. If there is apache, install mod_proxy_http settings.
 
 # <a name="postgres">PostgreSQL</a>
 
@@ -213,3 +215,25 @@ Ansible Common Roles
   1. install tomcat
   1. make symlink of jdbc drivers to /opt/tomcat/lib/
   1. create systemd unit and enable it
+
+  # <a name="glassfish">Glassfish</a>
+
+  - Usage
+
+    ```yaml
+      roles:
+        - role: ../ansible_common/glassfish
+    ```
+
+  - Argument
+
+  | Argument     | Default value | Explanation |
+  |:-------------|:--------------|:------------|
+  |GLASSFISH_VERSION  |4.1.1| source code is published in http://download.java.net/glassfish/{{ GLASSFISH_VERSION }}/release/glassfish-{{ GLASSFISH_VERSION }}.zip|
+
+  - Abstract
+    1. install openjdk 1.8.0 and postgresql/mysql jdbc driver
+    1. donwload glassfish source
+    1. install glassfish
+    1. make symlink of jdbc drivers to /opt/glassfish4/glassfish/domains/domain1/lib/
+    1. create systemd unit and enable it
