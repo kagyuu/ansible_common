@@ -1,0 +1,11 @@
+---
+- name: Setup firewalld
+  service: name=firewalld state=started
+
+- firewalld: port={{ item }} state=enabled permanent=yes
+  with_items: "{{ PORTS }}"
+
+- firewalld: service={{ item }} state=enabled permanent=yes
+  with_items: "{{ SERVICES }}"
+
+- service: name=firewalld state=restarted

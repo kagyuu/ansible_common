@@ -2,12 +2,14 @@
 Ansible Common Roles
 
 - [Common](#common)
+- [Firewalld](#firewalld)
 - [LDAP](#ldap)
 - [phpLDAPAdmin](#ldapadmin)
 - [PWM](#pwm) : self password management web app
 - [PostgreSQL](#postgres) : Use CentOS Base yum version
 - [Ruby](#ruby)
 - [Tomcat](#tomcat)
+- [Maven](#maven)
 
 # <a name="common">Common</a>
 
@@ -25,7 +27,25 @@ Ansible Common Roles
   1. yum update
   1. install basic commands. curl wget postfix etc.
   1. disable SELinux :-P
-  1. setup firewalld
+  1. open mdns (avahi) ports.
+
+# <a name="firewalld">Firewalld</a>
+
+- Usage
+
+  ```yaml
+    roles:
+      - { role: ../ansible_common/firewalld, PORTS:["4848/tcp","8080/tcp"], SERVICES:["ldap"] }     
+  ```
+
+- Argument
+
+| Argument     | Default value | Explanation |
+|:-------------|:--------------|:------------|
+|PORTS      |[] |these ports are opened for client computers|
+|SERVICES   |[] |these services are opened for client computers|
+
+- Abstract : make specified ports and services open
 
 # <a name="ldap">LDAP</a>
 
@@ -207,6 +227,7 @@ Ansible Common Roles
 
 | Argument     | Default value | Explanation |
 |:-------------|:--------------|:------------|
+|JAVA_VERSION|1.8.0||
 |TOMCAT_VERSION  |8.5.8| source code is published in http://ftp.tsukuba.wide.ad.jp/software/apache/tomcat/tomcat-8/v{{ TOMCAT_VERSION }}/bin/apache-tomcat-{{ TOMCAT_VERSION }}.tar.gz|
 
 - Abstract
@@ -216,24 +237,65 @@ Ansible Common Roles
   1. make symlink of jdbc drivers to /opt/tomcat/lib/
   1. create systemd unit and enable it
 
-  # <a name="glassfish">Glassfish</a>
+# <a name="glassfish">Glassfish</a>
 
-  - Usage
+- Usage
 
-    ```yaml
-      roles:
-        - role: ../ansible_common/glassfish
-    ```
+  ```yaml
+    roles:
+      - role: ../ansible_common/glassfish
+  ```
 
-  - Argument
+- Argument
 
-  | Argument     | Default value | Explanation |
-  |:-------------|:--------------|:------------|
-  |GLASSFISH_VERSION  |4.1.1| source code is published in http://download.java.net/glassfish/{{ GLASSFISH_VERSION }}/release/glassfish-{{ GLASSFISH_VERSION }}.zip|
+| Argument     | Default value | Explanation |
+|:-------------|:--------------|:------------|
+|JAVA_VERSION|1.8.0||
+|GLASSFISH_VERSION  |4.1| source code is published in http://download.java.net/glassfish/{{ GLASSFISH_VERSION }}/release/glassfish-{{ GLASSFISH_VERSION }}.zip|
 
-  - Abstract
-    1. install openjdk 1.8.0 and postgresql/mysql jdbc driver
-    1. donwload glassfish source
-    1. install glassfish
-    1. make symlink of jdbc drivers to /opt/glassfish4/glassfish/domains/domain1/lib/
-    1. create systemd unit and enable it
+- Abstract
+  1. install openjdk 1.8.0
+  1. donwload glassfish source
+  1. install glassfish
+  1. create systemd unit and enable it
+
+- Glassfish 4.1.1 has bug in the management console. see [JIRA GLASSFISH-21443](https://java.net/jira/browse/GLASSFISH-21443)
+- Any JDBC Drivers are not installed.
+
+# <a name="maven">Maven</a>
+
+- Usage
+
+  ```yaml
+    roles:
+      - role: ../ansible_common/maven
+  ```
+
+- Argument
+
+| Argument     | Default value | Explanation |
+|:-------------|:--------------|:------------|
+|JAVA_VERSION |1.8.0||
+|MAVEN_VERSION|3.3.9||
+
+- Abstract
+  1. install openjdk 1.8.0
+  1. install maven 3.3.9
+  1. create .m2/settings.xml if proxy.yml is defined.
+
+- if proxy settings is needed, write like follows :
+
+```yaml
+---
+http_proxy_host: proxy.foo.com
+http_proxy_port: 3128
+http_proxy_username: john@foo.com
+http_proxy_password: password
+
+http_proxy: http://{{ http_proxy_username | urlencode() }}:{{ http_proxy_password }}@{{ http_proxy_host }}:{{ http_proxy_port }}
+
+proxy_env :
+  no_proxy: 127.0.0.1,localhost
+  http_proxy: "{{ http_proxy | default(None) }}"
+  https_proxy: "{{ http_proxy | default(None) }}"
+```

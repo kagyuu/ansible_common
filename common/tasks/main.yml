@@ -64,14 +64,8 @@
     - firewalld
     - avahi-daemon
 
-- name: Setup firewalld
-  firewalld: permanent=True service={{ item }} state=enabled permanent=yes
+- name: Setup firewall, open ports for mdns (avahi) service
+  firewalld: service={{ item }} state=enabled permanent=yes
   with_items:
-    - http
-    - https
     - mdns
   notify: Reload firewall
-
-# Workaround for ansible 2.1 : handler in role not work
-- name: Reload firewall
-  service: name=firewalld state=restarted

@@ -2,9 +2,7 @@
 - name: Install open-jdk
   yum: name={{ item }}  state=present
   with_items:
-    - java-1.8.0-openjdk-devel
-    - maven
-    - ant
+    - java-{{ JAVA_VERSION }}-openjdk-devel
     - postgresql-jdbc
     - mysql-connector-java
 
@@ -57,13 +55,3 @@
     name=tomcat
     state=restarted
     enabled=yes
-
-- name: Setup firewalld
-  service: name=firewalld state=started
-
-- firewalld: permanent=True port={{ item }} state=enabled permanent=yes
-  with_items:
-    - 8080/tcp
-    - 8443/tcp
-
-- service: name=firewalld state=restarted

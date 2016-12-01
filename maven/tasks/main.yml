@@ -1,0 +1,43 @@
+---
+- name: Install open-jdk
+  yum: name="java-{{ JAVA_VERSION }}-openjdk-devel" state=present
+
+- name: Check whether maven was downloaded or not
+  stat: path="/opt/apache-maven-{{ MAVEN_VERSION }}"
+  register: opt_mvn
+
+- name: Download maven
+  get_url:
+    url="http://ftp.yz.yamagata-u.ac.jp/pub/network/apache/maven/maven-3/{{ MAVEN_VERSION }}/binaries/apache-maven-{{ MAVEN_VERSION }}-bin.tar.gz"
+    dest=/tmp
+  when: not opt_mvn.stat.exists
+
+- name: Unarchive maven
+  unarchive:
+    src=/tmp/apache-maven-{{ MAVEN_VERSION }}-bin.tar.gz
+    dest=/opt
+    force=yes
+    copy=no
+  when: not opt_mvn.stat.exists
+
+- name: Install maven
+  file: src="/opt/apache-maven-{{ MAVEN_VERSION }}/bin/mvn" dest=/usr/local/bin/mvn state=link force=yes
+
+- name: Create .m2 directory
+  file: path=~/.m2 state=directory
+
+# if there is no settints for proxy, the template task will be failed.
+# But it's ok because you don't need proxy.
+- name: create .m2/settings.xml (no user/password version)
+  template:
+    src=settings0.xml
+    dest=~/.m2/settings.xml
+    force=yes
+  ignore_errors: yes
+
+- name: create .m2/settings.xml (user/password version)
+  template:
+    src=settings1.xml
+    dest=~/.m2/settings.xml
+    force=yes
+  ignore_errors: yes

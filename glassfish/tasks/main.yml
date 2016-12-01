@@ -1,12 +1,6 @@
 ---
 - name: Install open-jdk
-  yum: name={{ item }}  state=present
-  with_items:
-    - java-1.8.0-openjdk-devel
-    - maven
-    - ant
-    - postgresql-jdbc
-    - mysql-connector-java
+  yum: name="java-{{ JAVA_VERSION }}-openjdk-devel" state=present
 
 - name: Check whether glassfish was downloaded or not
   stat: path="/opt/glassfish-{{ GLASSFISH_VERSION }}"
@@ -35,13 +29,6 @@
     owner=glassfish group=glassfish
     recurse=yes
 
-# TODO : How about postgis.jar?
-- name: Install jdbc drivers
-  file: src=/usr/share/java/{{ item }} dest=/opt/glassfish4/glassfish/domains/domain1/lib/{{ item }} state=link force=yes
-  with_items:
-    - postgresql-jdbc3.jar
-    - mysql-connector-java.jar
-
 - name: Install systemd config for glassfish
   copy: src=systemd_glassfish dest=/usr/lib/systemd/system/glassfish.service mode=0644
 
@@ -50,16 +37,6 @@
     name=glassfish
     state=started
     enabled=yes
-
-- name: Setup firewalld
-  service: name=firewalld state=started
-
-- firewalld: permanent=True port={{ item }} state=enabled permanent=yes
-  with_items:
-    - 8080/tcp
-    - 4848/tcp
-
-- service: name=firewalld state=restarted
 
 - name: set admin password
   expect:

@@ -80,13 +80,3 @@
   with_items:
     - /etc/openldap/init_work/create_base_entry.ldif
   when: not create_base_entry.stat.exists
-
-- name: Setup firewalld
-  service: name=firewalld state=started
-
-- name: Setup firewalld
-  firewalld: permanent=True service={{ item }} state=enabled permanent=yes
-  with_items:
-    - ldap
-
-- service: name=firewalld state=restarted

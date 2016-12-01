@@ -1,0 +1,13 @@
+<settings>
+  <proxies>
+    <proxy>
+      <active>true</active>
+      <protocol>http</protocol>
+      <host>{{ http_proxy_host }}</host>
+      <port>{{ http_proxy_port }}</port>
+      <username>{{ http_proxy_username }}</username>
+      <password>{{ http_proxy_password }}</password>
+      <nonProxyHosts>127.0.0.1|localhost</nonProxyHosts>
+    </proxy>
+  </proxies>
+</settings>
