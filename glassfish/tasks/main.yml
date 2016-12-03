@@ -43,8 +43,8 @@
     command: "/opt/glassfish4/bin/asadmin change-admin-password --user admin"
     responses:
       'Enter the admin password>': ""
-      'Enter the new admin password>': "password"
-      'Enter the new admin password again>': "password"
+      'Enter the new admin password>': "{{ ADMIN_PASSWORD }}"
+      'Enter the new admin password again>': "{{ ADMIN_PASSWORD }}"
 
 - name: set management console user
   expect:
@@ -53,7 +53,7 @@
       # These response messages is regex. So, we must escape [ and ]
       # if these are not control characters of regex.
       "Enter admin user name \\[Enter to accept default\\]> ": "admin"
-      "Enter admin password> ": "password"
+      "Enter admin password> ": "{{ ADMIN_PASSWORD }}"
 
 - name: make management console ssl
   command: "/opt/glassfish4/bin/asadmin enable-secure-admin"

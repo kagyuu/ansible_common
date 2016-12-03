@@ -9,6 +9,7 @@ Ansible Common Roles
 - [PostgreSQL](#postgres) : Use CentOS Base yum version
 - [Ruby](#ruby)
 - [Tomcat](#tomcat)
+- [Glassfish](#glassfish)
 - [Maven](#maven)
 
 # <a name="common">Common</a>
@@ -252,6 +253,7 @@ Ansible Common Roles
 |:-------------|:--------------|:------------|
 |JAVA_VERSION|1.8.0||
 |GLASSFISH_VERSION  |4.1| source code is published in http://download.java.net/glassfish/{{ GLASSFISH_VERSION }}/release/glassfish-{{ GLASSFISH_VERSION }}.zip|
+|ADMIN_PASSWORD|password||
 
 - Abstract
   1. install openjdk 1.8.0
@@ -259,7 +261,7 @@ Ansible Common Roles
   1. install glassfish
   1. create systemd unit and enable it
 
-- Glassfish 4.1.1 has bug in the management console. see [JIRA GLASSFISH-21443](https://java.net/jira/browse/GLASSFISH-21443)
+- Glassfish 4.1.1 has bug at the management console in Nov-2016. see [JIRA GLASSFISH-21443](https://java.net/jira/browse/GLASSFISH-21443)
 - Any JDBC Drivers are not installed.
 
 # <a name="maven">Maven</a>
@@ -280,7 +282,7 @@ Ansible Common Roles
 
 - Abstract
   1. install openjdk 1.8.0
-  1. install maven 3.3.9
+  1. install maven 3.3.9 (yum version is too old, install from apache site)
   1. create .m2/settings.xml if proxy.yml is defined.
 
 - if proxy settings is needed, write like follows :
