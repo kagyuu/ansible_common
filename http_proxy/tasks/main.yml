@@ -1,0 +1,22 @@
+---
+- name: Install Apache
+  yum: name=httpd state=present
+
+- name: Check whether reverse proxy setting is installed or not
+  stat: path=/etc/httpd/conf.d/http_proxy.conf
+  register: proxy_conf
+
+- name: Install http_proxy.conf
+  copy: src=http_proxy.conf dest=/etc/httpd/conf.d/http_proxy.conf mode=0644
+  when: not proxy_conf.stat.exists
+
+- name: append reverse proxy settings
+  lineinfile:
+    dest=/etc/httpd/conf.d/http_proxy.conf
+    line={{ item }}
+  with_items:
+    - 'ProxyPass {{ REQUEST }} {{ DEST }}'
+    - 'ProxyPassReverse {{ REQUEST }} {{ DEST }}'
+
+- name: start Apache
+  service: name=httpd enabled=Yes state=restarted

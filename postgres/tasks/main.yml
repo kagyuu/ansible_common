@@ -20,8 +20,14 @@
     insertafter="#[ ]+TYPE[ ]+DATABASE[ ]+USER[ ]+ADDRESS[ ]+METHOD"
     line={{ item }}
   with_items:
+    - 'host    {{ db_name }}         {{ db_name }}         0.0.0.0/0               md5'
     - 'host    {{ db_name }}         {{ db_name }}         127.0.0.1/32            md5'
     - 'host    {{ db_name }}         {{ db_name }}         ::1/128                 md5'
+
+- lineinfile:
+    dest=/var/lib/pgsql/data/postgresql.conf
+    insertbefore="#listen_addresses = 'localhost'"
+    line="listen_addresses = '*'"
 
 - name: PostgreSQL service setup
   service:

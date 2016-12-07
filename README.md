@@ -11,6 +11,7 @@ Ansible Common Roles
 - [Tomcat](#tomcat)
 - [Glassfish](#glassfish)
 - [Maven](#maven)
+- [http_proxy](#http_proxy)
 
 # <a name="common">Common</a>
 
@@ -301,3 +302,18 @@ proxy_env :
   http_proxy: "{{ http_proxy | default(None) }}"
   https_proxy: "{{ http_proxy | default(None) }}"
 ```
+# <a name="http_proxy">http_proxy</a>
+
+- Usage
+
+  ```yaml
+    roles:
+      - { role: ../ansible_common/http_proxy, REQUEST:"/pwm/", DEST:"http://localhost:8080/pwm/"}
+  ```
+
+- Argument
+
+| Argument     | Default value | Explanation |
+|:-------------|:--------------|:------------|
+|REQUEST |(none)|If user requests url which has {{ REQUEST }}, http_proxy will farm out the request to {{ DEST }}|
+|DEST    |(none)||
