@@ -18,6 +18,7 @@ objectClass: inetOrgPerson
 cn: ichiro
 sn: suzuki
 userPassword: ichiro123
+mail: ichiro@example.com
 
 # test user
 dn: cn=jiro,ou=People,{{ SUFFIX }}
@@ -25,6 +26,7 @@ objectClass: inetOrgPerson
 cn: jiro
 sn: suzuki
 userPassword: jiro123
+mail: jiro@example.com
 
 # admin group
 dn: cn=admin,ou=Group,{{ SUFFIX }}
