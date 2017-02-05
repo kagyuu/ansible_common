@@ -31,6 +31,12 @@
 # On yum repository, pexpect is too old.
 - pip: name=pexpect
 
+- name: add shared lib /usr/local/lib /usr/local/lib64
+  copy:
+    src: local.conf
+    dest: /etc/ld.so.conf.d/
+    mode: 0644
+
 - name: Disable SELinux
   selinux: state=disabled
 
