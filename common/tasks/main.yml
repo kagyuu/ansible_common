@@ -30,6 +30,7 @@
     - tar
     - unzip
     - python-pip
+    - sysstat
 
 # ansible expect module needs latest (>=3.3) pexpect.
 # On yum repository, pexpect is too old.
@@ -73,6 +74,7 @@
     - postfix
     - firewalld
     - avahi-daemon
+    - sysstat
 
 - name: Setup firewall, open ports for mdns (avahi) service
   firewalld: service={{ item }} state=enabled permanent=yes
