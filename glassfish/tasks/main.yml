@@ -3,7 +3,7 @@
   yum: name="java-{{ JAVA_VERSION }}-openjdk-devel" state=present
 
 - name: Check whether glassfish was downloaded or not
-  stat: path="/opt/glassfish-{{ GLASSFISH_VERSION }}"
+  stat: path="/opt/glassfish4"
   register: opt_glassfish
 
 - group: name=glassfish
