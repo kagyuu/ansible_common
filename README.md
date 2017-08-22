@@ -313,7 +313,7 @@ proxy_env :
   http_proxy: "{{ http_proxy | default(None) }}"
   https_proxy: "{{ http_proxy | default(None) }}"
 ```
-# <a name="http_proxy">http_proxy</a>
+# <a name="http_proxy">http_proxy (reverse proxy settings for apache)</a>
 
 - Usage
 
