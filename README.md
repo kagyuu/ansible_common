@@ -245,7 +245,11 @@ Ansible Common Roles
 
   ```yaml
     roles:
-      - role: ../ansible_common/glassfish
+      - { role: ../ansible_common/glassfish
+          , db_name: gis
+          , db_passwd: password
+          , db: postgis
+        }
   ```
 
 - Argument
@@ -253,17 +257,24 @@ Ansible Common Roles
 | Argument     | Default value | Explanation |
 |:-------------|:--------------|:------------|
 |JAVA_VERSION|1.8.0||
-|GLASSFISH_VERSION  |4.1| source code is published in http://download.java.net/glassfish/{{ GLASSFISH_VERSION }}/release/glassfish-{{ GLASSFISH_VERSION }}.zip|
+|GLASSFISH_VERSION  |4.1.2| source code is published in http://download.java.net/glassfish/{{ GLASSFISH_VERSION }}/release/glassfish-{{ GLASSFISH_VERSION }}.zip|
 |ADMIN_PASSWORD|password||
+|db_name||Database name (it is same as the database admin user)|
+|db_password||password for {{db_name}}|
+|db||Database type [postgis, postgresql]|
 
 - Abstract
   1. install openjdk 1.8.0
   1. donwload glassfish source
   1. install glassfish
   1. create systemd unit and enable it
+  1. create jms queue jms/myQueue
+  1. create datasource jdbc/sample
 
 - Glassfish 4.1.1 has bug at the management console in Nov-2016. see [JIRA GLASSFISH-21443](https://java.net/jira/browse/GLASSFISH-21443)
-- Any JDBC Drivers are not installed.
+- JDBC Drivers would be installed.
+- If you want to prepare the postgis jdbc driver for the glassfish, you must call the maven role before calling this role.
+- The "jdbc/sample" refers the app-connection-pool. You can add another datasource for example "jdbc/activitiDS" that refers the app-connection-pool later. Or You can change the "jdbc/sample" to your favorite name.
 
 # <a name="maven">Maven</a>
 

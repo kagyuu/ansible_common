@@ -40,22 +40,3 @@
   register: datasource
 
 - debug: var=datasource.stdout_lines
-
-- name: create glassfish jms
-  command: >
-    /opt/glassfish4/bin/asadmin create-jms-resource
-    --restype javax.jms.Queue
-    --property Name=myQueuePhysicalDestination
-    jms/myQueue
-  register: queue
-
-- debug: var=queue.stdout_lines
-
-- name: create glassfish jms connection factory
-  command: >
-    /opt/glassfish4/bin/asadmin create-jms-resource
-    --restype javax.jms.QueueConnectionFactory
-    jms/myQueueConnectionFactory
-  register: queueConFactory
-
-- debug: var=queueConFactory.stdout_lines
