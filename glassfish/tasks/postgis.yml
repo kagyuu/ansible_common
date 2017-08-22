@@ -1,0 +1,16 @@
+---
+- name: download postgis-java source
+  git:
+    repo=https://github.com/postgis/postgis-java.git
+    dest="{{ src_dir }}/postgis-java"
+    version="v2.1-maintenance"
+    force=yes
+
+- name: build postgis jdbc driver
+  command:
+    chdir="{{ src_dir }}/postgis-java"
+    /usr/local/bin/mvn package
+
+- name: install postgis jdbc driver
+  command:
+    find "{{ src_dir }}/postgis-java" -name postgis-*.jar -exec cp -fv {} "/opt/glassfish4/glassfish/domains/domain1/lib/" \;

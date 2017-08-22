@@ -37,6 +37,7 @@
     - unzip
     - python-pip
     - sysstat
+    - git
 
 # ansible expect module needs latest (>=3.3) pexpect.
 # On yum repository, pexpect is too old.

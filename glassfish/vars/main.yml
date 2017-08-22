@@ -1,5 +1,7 @@
 ---
 JAVA_VERSION: 1.8.0
-GLASSFISH_VERSION: 4.1
+GLASSFISH_VERSION: 4.1.2
 
 ADMIN_PASSWORD: password
+
+src_dir: /usr/local/src

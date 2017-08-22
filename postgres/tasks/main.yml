@@ -5,6 +5,7 @@
   with_items:
     - "postgresql-server"
     - "python-psycopg2"
+    - "postgresql-jdbc"
 
 - name: PostgreSQL initdb
   command:
