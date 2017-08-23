@@ -1,6 +1,9 @@
 ---
+- name: if /vagrant is not exist, create it. 
+  file: path=/vagrant state=directory owner=root group=root mode=0755
+
 - name: Install basic yum plugins
-  yum: name={{ item }}  state=present
+  yum: name={{ item }} state=present
   with_items:
     - yum-plugin-priorities
     - yum-plugin-fastestmirror
@@ -11,8 +14,8 @@
 - name: Install axelget yum plugin and axel (speedup http download)
   yum: name=yum-axelget state=present
 
-- name: update os
-  command: yum -y update
+- name: yum update
+  yum: name=* state=latest
 
 - name: Install Basic Services
   yum: name={{ item }}  state=present

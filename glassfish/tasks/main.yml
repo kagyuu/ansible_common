@@ -2,26 +2,24 @@
 - name: Install open-jdk
   yum: name="java-{{ JAVA_VERSION }}-openjdk-devel" state=present
 
-- name: Check whether glassfish was downloaded or not
-  stat: path="/opt/glassfish4"
-  register: opt_glassfish
-
 - group: name=glassfish
 - user: name=glassfish group=glassfish
 
 - name: Download glassfish
-  get_url:
+  stat: path=/vagrant/glassfish-{{ GLASSFISH_VERSION }}.zip
+  register: glassfish_zip_archive
+
+- get_url:
     url="http://download.java.net/glassfish/{{ GLASSFISH_VERSION }}/release/glassfish-{{ GLASSFISH_VERSION }}.zip"
-    dest=/tmp
-  when: not opt_glassfish.stat.exists
+    dest=/vagrant
+  when: not glassfish_zip_archive.stat.exists
 
 - name: Unarchive glassfish
   unarchive:
-    src=/tmp/glassfish-{{ GLASSFISH_VERSION }}.zip
+    src=/vagrant/glassfish-{{ GLASSFISH_VERSION }}.zip
     dest=/opt
     force=yes
     copy=no
-  when: not opt_glassfish.stat.exists
 
 - name: Change owner of /opt/glassfish4 glassfish:glassfish
   file:
