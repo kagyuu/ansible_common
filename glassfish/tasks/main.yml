@@ -9,17 +9,26 @@
   stat: path=/vagrant/glassfish-{{ GLASSFISH_VERSION }}.zip
   register: glassfish_zip_archive
 
-- get_url:
-    url="http://download.java.net/glassfish/{{ GLASSFISH_VERSION }}/release/glassfish-{{ GLASSFISH_VERSION }}.zip"
-    dest=/vagrant
-  when: not glassfish_zip_archive.stat.exists
-
 - name: Unarchive glassfish
   unarchive:
     src=/vagrant/glassfish-{{ GLASSFISH_VERSION }}.zip
     dest=/opt
     force=yes
     copy=no
+  when: glassfish_zip_archive.stat.exists
+
+- get_url:
+    url="http://download.java.net/glassfish/{{ GLASSFISH_VERSION }}/release/glassfish-{{ GLASSFISH_VERSION }}.zip"
+    dest=/tmp
+  when: not glassfish_zip_archive.stat.exists
+
+- name: Unarchive glassfish
+  unarchive:
+    src=/tmp/glassfish-{{ GLASSFISH_VERSION }}.zip
+    dest=/opt
+    force=yes
+    copy=no
+  when: not glassfish_zip_archive.stat.exists
 
 - name: Change owner of /opt/glassfish4 glassfish:glassfish
   file:
