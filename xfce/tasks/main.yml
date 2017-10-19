@@ -1,0 +1,35 @@
+---
+# gcc, dkms, kernel-devel are for building VBOXGuestAddin.
+- name: install xfce
+  yum: name="{{ item }}" state=present
+  with_items:
+    - "@X Window System"
+    - "@Xfce"
+    - firefox
+    - ibus-kkc
+    - ipa-gothic-fonts
+    - ipa-mincho-fonts
+    - ipa-pgothic-fonts
+    - ipa-pmincho-fonts
+    - vlgothic-fonts
+    - vlgothic-p-fonts
+    - gcc
+    - dkms
+    - kernel-devel
+
+- name: change runlevel graphical
+  shell: systemctl set-default graphical.target
+
+# 構築対象のサーバ側で shutdown -r now を実行。
+# Async なので結果を待たずに、ただちに再起動待ちタスクが実行される
+- name: Reboot the Application Server to enable graphical screen
+  shell: sleep 2 && shutdown now
+  async: 1
+  poll: 0
+
+- debug:
+    msg: "Please add a virtual optical drive to VM manually if you want to install Virtualbox Addon."
+
+#- name: Wait the Application Server ready
+#  local_action: wait_for host={{ ansible_ssh_host }} port={{ ansible_ssh_port }} delay=60 timeout=600
+#  sudo: false
