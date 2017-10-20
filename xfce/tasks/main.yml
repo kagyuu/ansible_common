@@ -5,6 +5,7 @@
   with_items:
     - "@X Window System"
     - "@Xfce"
+    - mousepad
     - firefox
     - ibus-kkc
     - ipa-gothic-fonts
