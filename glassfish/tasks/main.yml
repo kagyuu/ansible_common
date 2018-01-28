@@ -5,22 +5,17 @@
 - group: name=glassfish
 - user: name=glassfish group=glassfish
 
-- name: Download glassfish
-  stat: path=/vagrant/glassfish-{{ GLASSFISH_VERSION }}.zip
-  register: glassfish_zip_archive
-
-- name: Unarchive glassfish
+- name: copy local glassfish archive if exists
   unarchive:
-    src=/vagrant/glassfish-{{ GLASSFISH_VERSION }}.zip
+    src=files/glassfish-{{ GLASSFISH_VERSION }}.zip
     dest=/opt
-    force=yes
-    copy=no
-  when: glassfish_zip_archive.stat.exists
+  ignore_errors: true
+  register: resutl_expand_local_glassfish
 
 - get_url:
     url="http://download.java.net/glassfish/{{ GLASSFISH_VERSION }}/release/glassfish-{{ GLASSFISH_VERSION }}.zip"
     dest=/tmp
-  when: not glassfish_zip_archive.stat.exists
+  when: resutl_expand_local_glassfish | failed
 
 - name: Unarchive glassfish
   unarchive:
@@ -28,7 +23,7 @@
     dest=/opt
     force=yes
     copy=no
-  when: not glassfish_zip_archive.stat.exists
+  when: resutl_expand_local_glassfish | failed
 
 - name: Change owner of /opt/glassfish4 glassfish:glassfish
   file:

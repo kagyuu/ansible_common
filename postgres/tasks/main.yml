@@ -40,14 +40,17 @@
     state=restarted
     enabled=yes
 
+# There are no locale support other than en_US in Vagrant's CentOS7 image.
+# We can put any unicode texts on the database even if encoding=en_US.UTF8.
+# That's no problem.
 - name: Create db
   sudo: yes
   sudo_user: postgres
   postgresql_db:
     name={{ db_name }}
-    encoding='UTF-8'
-    lc_collate='ja_JP.UTF-8'
-    lc_ctype='ja_JP.UTF-8'
+    encoding='UTF8'
+    lc_collate='en_US.UTF8'
+    lc_ctype='en_US.UTF8'
     template='template0'
 
 - name: Create user

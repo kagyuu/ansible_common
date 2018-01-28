@@ -1,3 +1,5 @@
 ---
 src_dir: /usr/local/src
-ruby_version: ruby-2.3.1
+ruby_version: 2.4
+ruby_revision: 3
+ruby_hash: "sha256:fd0375582c92045aa7d31854e724471fb469e11a4b08ff334d39052ccaaa3a98"
