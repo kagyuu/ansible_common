@@ -79,8 +79,8 @@
 
 - debug: var=queueConFactory.stdout_lines
 
-- include: tasks/postgis.yml
+- import_tasks: tasks/postgis.yml
   when: db in ['postgis']
 
-- include: tasks/postgresql.yml
+- import_tasks: tasks/postgresql.yml
   when: db in ['postgresql', 'postgis']

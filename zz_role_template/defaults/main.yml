@@ -7,7 +7,7 @@
     PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
 
 - name: Install Passenger modules for Apache 
-  sudo: yes
+  become: yes
   command:
     passenger-install-apache2-module --auto
   environment:

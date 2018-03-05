@@ -11,8 +11,9 @@
 - name: Install axelget yum plugin and axel (speedup http download)
   yum: name=yum-axelget state=present
 
-- name: yum update
-  yum: name=* state=latest
+# it would cause desaster in the cloud.
+#- name: yum update
+#  yum: name=* state=latest
 
 - name: Install Basic Services
   yum: name={{ item }}  state=present
@@ -71,7 +72,7 @@
 # delay が短すぎると shutdown 中に port にアクセスして wait_for から抜けてしまう
 - name: Wait the Application Server ready
   local_action: wait_for host={{ ansible_ssh_host }} port={{ ansible_ssh_port }} delay=30 timeout=300
-  sudo: false
+  become: false
   when: selinux_result.stdout != "Disabled"
 
 - name: Start Services
