@@ -1,0 +1,94 @@
+---
+- name: install required libraries for lsf
+  yum: name={{ item }}  state=present
+  with_items:
+    - java-1.8.0-openjdk
+    - ed
+    - openssh-server
+    - openssh-clients
+
+- group: name=lsfadmin
+- user: name=lsfadmin group=lsfadmin
+
+- name: make %lsfadmin sudoer
+  copy:
+    src: lsfadmin
+    dest: /etc/sudoers.d/
+    mode: 0440
+
+- name: create lsf top
+  file:
+    path=/usr/share/lsf state=directory
+    owner=lsfadmin group=lsfadmin
+    recurse=yes
+
+- name: create lsf install directory
+  file:
+    path=/usr/share/lsf_distrib state=directory
+    owner=lsfadmin group=wheel
+    recurse=yes
+
+- name: copy local lsf archive
+  copy:
+    src=files/lsfsce{{ LSF_VERSION }}-x86_64.tar.gz
+    dest=/tmp/lsfsce{{ LSF_VERSION }}-x86_64.tar.gz
+
+- name: unarchive lsf archive
+  unarchive:
+    src=/tmp/lsfsce{{ LSF_VERSION }}-x86_64.tar.gz
+    dest=/tmp
+    force=yes
+    copy=no
+
+- name: copy lsf install scripts
+  unarchive:
+    src=/tmp/lsfsce{{ LSF_VERSION }}-x86_64/lsf/lsf10.1_lsfinstall_linux_x86_64.tar.Z
+    dest=/usr/share/lsf_distrib
+    force=yes
+    copy=no
+
+- name: Copy lsf install image
+  copy:
+    src=/tmp/lsfsce{{ LSF_VERSION }}-x86_64/lsf/lsf10.1_linux2.6-glibc2.3-x86_64.tar.Z
+    dest=/usr/share/lsf_distrib
+    remote_src=yes
+
+- name: modify lsf install settings
+  lineinfile:
+    dest=/usr/share/lsf_distrib/lsf10.1_lsfinstall/install.config
+    insertafter="{{ item.location }}"
+    line="{{ item.setting }}"
+    backup=true
+  with_items:
+    - { location : '# LSF_TOP="/usr/share/lsf"'            , setting : 'LSF_TOP="/usr/share/lsf"' }
+    - { location : '# LSF_ADMINS="lsfadmin user1 user2"'   , setting : 'LSF_ADMINS="lsfadmin"' }
+    - { location : '# LSF_CLUSTER_NAME="cluster1"'         , setting : 'LSF_CLUSTER_NAME="cluster1"' }
+    - { location : '# LSF_MASTER_LIST="hostm hosta hostc"' , setting : 'LSF_MASTER_LIST="{{ inventory_hostname }}"' }
+    - { location : '# LSF_TARDIR="/usr/share/lsf_distrib/"', setting : 'LSF_TARDIR="/usr/share/lsf_distrib/"' }
+    - { location : '# SILENT_INSTALL="Y"'                  , setting : 'SILENT_INSTALL="Y"' }
+    - { location : '# LSF_SILENT_INSTALL_TARLIST=""'       , setting : 'LSF_SILENT_INSTALL_TARLIST="all"' }
+
+- name: execute lsf installer
+  command:
+    ./lsfinstall -f install.config
+    chdir=/usr/share/lsf_distrib/lsf10.1_lsfinstall
+
+- name: ssh settings for lsf
+  lineinfile:
+    dest=/usr/share/lsf/conf/lsf.conf
+    line="LSF_RSH=ssh"
+    backup=true
+
+- name: Create a 2048-bit SSH key for user root
+  user:
+    name: root
+    generate_ssh_key: yes
+    ssh_key_bits: 2048
+    ssh_key_file: /root/.ssh/id_rsa
+
+- name: make root user to be able to login lsf-cluster without password
+  shell: |
+    touch ~/.ssh/authorized_keys
+    chmod 600 ~/.ssh/authorized_keys
+    cat ~/.ssh/id_rsa.pub > ~/.ssh/authorized_keys
+    ssh-keyscan localhost {{ inventory_hostname }} >> ~/.ssh/known_hosts
