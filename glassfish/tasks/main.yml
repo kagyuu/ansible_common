@@ -34,6 +34,14 @@
 - name: Install systemd config for glassfish
   copy: src=systemd_glassfish dest=/usr/lib/systemd/system/glassfish.service mode=0644
 
+- name: Install glassfish environment file that is red by systemd_glassfish
+  file:
+    path=/etc/sysconfig/glassfish
+    group=glassfish
+    owner=glassfish
+    state=touch
+    mode="u=rw,g=r,o=r"
+
 - name: glassfish service setup
   service:
     name=glassfish
@@ -84,3 +92,13 @@
 
 - import_tasks: tasks/postgresql.yml
   when: db in ['postgresql', 'postgis']
+
+- name: check lsf installed
+  stat: path=/usr/share/lsf/conf/profile.lsf
+  register: is_lsf_exist
+
+- name: add lsf environment settings to the glassfish environment file.
+  become: yes
+  become_user: glassfish
+  shell: source /usr/share/lsf/conf/profile.lsf && env | grep lsf >> /etc/sysconfig/glassfish
+  when: is_lsf_exist
