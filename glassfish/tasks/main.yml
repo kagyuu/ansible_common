@@ -95,10 +95,10 @@
 
 - name: check lsf installed
   stat: path=/usr/share/lsf/conf/profile.lsf
-  register: is_lsf_exist
+  register: lsf_profile
 
 - name: add lsf environment settings to the glassfish environment file.
   become: yes
   become_user: glassfish
   shell: source /usr/share/lsf/conf/profile.lsf && env | grep lsf >> /etc/sysconfig/glassfish
-  when: is_lsf_exist
+  when: lsf_profile.stat.exists
